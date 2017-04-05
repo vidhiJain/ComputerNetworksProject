@@ -64,7 +64,7 @@ void home()
 								 FILE * file;
 								 char temp1[30]="data/"; 	
 								 strcat(temp1,temp);
-								 file = fopen( temp1 , "a");
+								 file = fopen( temp1 , "r");
 								 if (file) {
 								 	notopen=0;
 								 	char ch;
@@ -99,11 +99,6 @@ void home()
 		case 3:
 				break;
 	}
-
-}
-
-void writetochatlog(char *message,char*from,char* time,int flag, FILE *fp)
-{
 
 }
 int  main()

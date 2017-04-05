@@ -13,14 +13,19 @@
   
 #define PORT 4444 
 #define BUF_SIZE 2000 
+
 void error(int n){
   switch(n){
     case 100: printf("Error creating socket!\n");  exit(1);  
     case 101: printf("Error connecting to the server!\n");  exit(1); 
+    case 102: printf("Error sending data!\n\t");  exit(1);  
+    case 103: printf("Error receiving data!\n");    exit(1);  
     default: printf("Error detected!\n");  exit(1);  
   }
 }
+
 int main(int argc, char**argv) {  
+  
   struct sockaddr_in addr, cl_addr;  
   int sockfd, ret;  
   char buffer[BUF_SIZE];  
@@ -53,20 +58,15 @@ int main(int argc, char**argv) {
   
   printf("Enter your message(s): ");
 
- while (fgets(buffer, BUF_SIZE, stdin) != NULL) {
-  ret = sendto(sockfd, buffer, BUF_SIZE, 0, (struct sockaddr *) &addr, sizeof(addr));  
-  if (ret < 0) {  
-   printf("Error sending data!\n\t-%s", buffer);  
+  while (fgets(buffer, BUF_SIZE, stdin) != NULL) {
+    ret = sendto(sockfd, buffer, BUF_SIZE, 0, (struct sockaddr *) &addr, sizeof(addr));  
+    if (ret < 0) error(102);
+    ret = recvfrom(sockfd, buffer, BUF_SIZE, 0, NULL, NULL);  
+    if (ret < 0) error(103);
+    printf("Received: ");
+    fputs(buffer, stdout);
+    printf("\n");
   }
-  ret = recvfrom(sockfd, buffer, BUF_SIZE, 0, NULL, NULL);  
-  if (ret < 0) {  
-   printf("Error receiving data!\n");    
-  } else {
-   printf("Received: ");
-   fputs(buffer, stdout);
-   printf("\n");
-  }  
- }
  
- return 0;    
+  return 0;    
 }  

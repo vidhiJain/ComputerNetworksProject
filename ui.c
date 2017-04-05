@@ -37,11 +37,11 @@ void reset()
     }
 void home()
 {
+	reset();
 	char name[30]="Test";
 	//getname(name);
 	printf("Welcome %s\n",name);
 	printf("Choose One of the following options:\n");
-	printf(MAKE_GREEN"");
 	printf("1.Start a new chat \t");
 
 	printf("2.View an old chat \t");
@@ -64,15 +64,32 @@ void home()
 								 FILE * file;
 								 char temp1[30]="data/"; 	
 								 strcat(temp1,temp);
-								 file = fopen( temp1 , "r");
-
+								 file = fopen( temp1 , "a");
 								 if (file) {
 								 	notopen=0;
 								 	char ch;
 								 	system("clear");
-								 	while( ( ch = fgetc(file) ) != EOF )
+								 //	int color=0;
+								 	int id_index=0;
+								 	char desid[17];
+								 	for(;id_index<16;id_index++){
+								 		ch = fgetc(file);
+								 		desid[id_index]=ch;
+								 	}
+								 	desid[17]='\0';
+								 	while( ( ch = fgetc(file) ) != EOF ){
+								 		if(ch=='|') 
+								 		{
+								 			ch = fgetc(file);
+								 			if(ch=='^')
+								 			green();
+								 			else if (ch=='*') blue();
+								 			ch = fgetc(file);
+								 		}
      									 printf("%c",ch);
+								 		}
    								 fclose(file);
+   								 reset();
 								 	}
 									else
 								 		printf("Please enter correct chatname \n");
@@ -82,6 +99,11 @@ void home()
 		case 3:
 				break;
 	}
+
+}
+
+void writetochatlog(char *message,char*from,char* time,int flag, FILE *fp)
+{
 
 }
 int  main()

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <dirent.h>
 #include <stdlib.h>
+#include <string.h>
 
  #define RESET "\e[m" 
  #define MAKE_GREEN "\e[32m" 
@@ -35,7 +36,7 @@ void reset()
         closedir (pDir);
         return 1;
     }
-void home()
+char *home()
 {
 	reset();
 	char name[30]="Test";
@@ -60,7 +61,7 @@ void home()
 		        int notopen=1;
 		        while(notopen){
 		         				scanf("%s",temp);
-		         				char str[999];
+		         				//char str[999];
 								 FILE * file;
 								 char temp1[30]="data/"; 	
 								 strcat(temp1,temp);
@@ -72,11 +73,13 @@ void home()
 								 //	int color=0;
 								 	int id_index=0;
 								 	char desid[17];
-								 	for(;id_index<16;id_index++){
+								 	for(;id_index<15;id_index++){
 								 		ch = fgetc(file);
 								 		desid[id_index]=ch;
 								 	}
+								 	ch = fgetc(file);
 								 	desid[17]='\0';
+								 	//printf("%s\n",desid );
 								 	while( ( ch = fgetc(file) ) != EOF ){
 								 		if(ch=='|') 
 								 		{
@@ -90,6 +93,8 @@ void home()
 								 		}
    								 fclose(file);
    								 reset();
+   								// scanf("%s",temp);
+   								// writetochatlog(temp,"You","Kuchtohtime",0,temp1);
 								 	}
 									else
 								 		printf("Please enter correct chatname \n");
@@ -99,6 +104,44 @@ void home()
 		case 3:
 				break;
 	}
+return NULL;
+}
+
+int writetochatlog(char *message,char*from,char* time,int flag, char* filename)
+{
+								 FILE * fp;
+								 char temp1[30]="data/"; 
+								 char name [50];
+   									name[0]='|';
+   									name[2]='\0';
+   									if(flag==0) 
+   									{name[1]='^'; //you
+   								strcpy(temp1,filename);
+   							}	
+   									else
+   									{ name[1]='*';
+   								strcat(temp1,filename);
+   							}
+   									strcat(name,from);
+								 	
+								 
+								 fp = fopen( temp1 , "a+");
+								 if (fp == NULL) {
+        								 printf("LogFile Error");
+         								return 0;
+      }
+   		
+      fprintf(fp, "\n");
+      fprintf(fp, "%s",name);
+      fprintf(fp, "[%s]:",time);
+      fprintf(fp, "%s",message);
+      fprintf(fp, "\n");
+
+   
+      /* close the file */
+      fclose(fp);
+
+
 
 }
 int  main()

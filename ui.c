@@ -39,6 +39,7 @@ int  listdir() {
     }
 char *home()
 {
+	system("clear");
 	reset();
 	char name[30]="Test";
 
@@ -48,18 +49,36 @@ char *home()
 	printf("1.Start a new chat \t");
 
 	printf("2.View an old chat \t");
-	printf("3.*3rd option kya tha?*\n");
+	printf("3.Delete an old chat\n");
 	int o=0;
 	scanf("%d",&o);
+	printf("%d\n",o );
 	switch(o)
 	{
-		case 1:// show list of all contacts
+		case 1:system("clear");
+				printf("Please Enter Name of the person you want to chat with \n");
+				 FILE * file1;
+				 file1 = fopen( "logdata/contacts" , "r");
+				 
+				if (file1) {
+								 	char ch;
+								 	system("clear");
+								 	while( ( ch = fgetc(file1) ) != EOF ){
+     									 printf("%c",ch);
+								 		}
+   								 fclose(file1);
+   							}
+   							else printf("File Error in 1\n");
+   	// 			char temp[30];
+				//  scanf("%s",temp);
+				//  char temp2[30]="data/"; 	
+				// strcat(temp2,temp);
+				// file1 = fopen( temp2 , "w+"); // take user id from server and write to file
 				break;
 		case 2: system("clear");
 				printf("Please Name the chat you want to open \n");
 				listdir();
 				printf("\n");
-		        char temp[30];
 		        int notopen=1;
 		        while(notopen){
 		         				scanf("%s",temp);
@@ -104,7 +123,26 @@ char *home()
 									}
 
 				break;
-		case 3:
+		case 3: system("clear");
+				printf("Please Name the chat you want to delete \n");
+				listdir();
+				printf("\n");
+				scanf("%s",temp);
+				FILE * file;
+				char temp1[30]="data/"; 	
+				strcat(temp1,temp);
+				if(!remove(temp1)) 
+				{
+					char c;
+					printf("Chat deleted.Enter to continue \n");
+					//usleep(1000);
+					scanf("%c",&c);
+					scanf("%c",&c);
+					//usleep(100);
+					home(); // recursive calls!! dangeorus
+				}
+				else
+					printf("Please enter correct chatname \n");
 				break;
 	}
 return NULL;

@@ -19,7 +19,8 @@ void reset()
 {
 	printf(RESET"");
 }
-    int  listdir() {
+char desid[17];
+int  listdir() {
         int len;
         struct dirent *pDirent;
         DIR *pDir;
@@ -40,6 +41,7 @@ char *home()
 {
 	reset();
 	char name[30]="Test";
+
 	//getname(name);
 	printf("Welcome %s\n",name);
 	printf("Choose One of the following options:\n");
@@ -72,7 +74,7 @@ char *home()
 								 	system("clear");
 								 //	int color=0;
 								 	int id_index=0;
-								 	char desid[17];
+								 	
 								 	for(;id_index<15;id_index++){
 								 		ch = fgetc(file);
 								 		desid[id_index]=ch;
@@ -95,6 +97,7 @@ char *home()
    								 reset();
    								// scanf("%s",temp);
    								// writetochatlog(temp,"You","Kuchtohtime",0,temp1);
+   								 return desid;
 								 	}
 									else
 								 		printf("Please enter correct chatname \n");

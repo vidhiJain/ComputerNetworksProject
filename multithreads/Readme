@@ -1,0 +1,33 @@
+Mohit Yadav
+2014A7PS074P
+
+Rock, Paper and Scissor  2 Player
+
+Function of Server:
+-Server spawns two child threads upon connection from the two clients.The first client that connects is player 1 and the second one is player 2.
+-The two child threads have shared memory in the form of a struct rps_arg //short for RockPaperScissor arguments
+-They update their respective moves in this shared memory struct.
+-A thread waits for the other thread until the other thread updates the current move in the shared memory.
+-The two threads send the winner of the round back to the clients
+	0-draw
+	1-player 1 wins
+	2- player 2 wins
+
+Function of Client:
+- A set of 3 matches is scheduled.
+- Client sends its call of rock, paper and scissor to the server. 
+	1-Rock
+	2-Paper
+	3-Scissors
+- It receives the result sent by the server.
+- Depending upon the result, it increments,decrements or does nothing to the variable points.
+- At the end of the game if points==
+	0 DRAW
+	>0 WIN
+	<0 LOSS
+
+Algorithm Complexity:
+
+For Server: O(n) where n is the number of games.
+For Client: O(n) where n is the number of games.
+ 

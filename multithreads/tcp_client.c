@@ -69,15 +69,38 @@ int main()
     }
 
     printf("Connection: %s\n",buffer);
-    while(1)
-    {
-    if ( recv ( clientSocket, buffer, 100, 0) < 0 )
+
+
+    // recv ( clientSocket, buffer, 100, 0);
+    // send(clientSocket, buffer, 100, 0);
+
+      printf("Enter your message(s): ");
+
+  while (fgets(buffer,100, stdin) != NULL) {
+     if ( send(clientSocket, buffer, 100, 0) < 0 )
     {
         printf("[ERROR] Connection closed prematurely.\n");
-        break;
     }
-    printf("%s\n",buffer );
+      if ( recv ( clientSocket, buffer, 100, 0) < 0 )
+    {
+        printf("[ERROR] Connection closed prematurely.\n");
     }
+    printf("Received: ");
+    fputs(buffer, stdout);
+    printf("\n");
+  }  
+    // while(1)
+    // {
+    // if ( recv ( clientSocket, buffer, 100, 0) < 0 )
+    // {
+    //     printf("[ERROR] Connection closed prematurely.\n");
+    //     break;
+    // }
+    // printf("%s\n",buffer );
+
+    // }
+
+    
     
     close( clientSocket );
     return 0;

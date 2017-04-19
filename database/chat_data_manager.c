@@ -1,5 +1,5 @@
 #include "chat_data_manager.h"
-char passw[256],ip[256];
+char passw[256],ip[256],message[10000];
 static int callback_pass(void *data, int argc, char **argv, char **azColName){
    int i;
    fprintf(stderr, "%s: ", (const char*)data);
@@ -7,6 +7,16 @@ static int callback_pass(void *data, int argc, char **argv, char **azColName){
       printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
    }
    snprintf(passw,sizeof(passw),"%s",argv[i-1]);
+   printf("\n");
+   return 0;
+}
+static int callback_message(void *data, int argc, char **argv, char **azColName){
+   int i;
+   fprintf(stderr, "%s: ", (const char*)data);
+   for(i=0; i<argc; i++){
+      printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
+   }
+   snprintf(message,sizeof(message),"%s",argv[i-1]);
    printf("\n");
    return 0;
 }
@@ -67,7 +77,7 @@ char* retrieve_userpass(char* username)
    return passw;
 }
 
-int update_ipaddress(char* username,char* ipaddr)
+int update_message(char* username,char* message)
 {
 	sqlite3 *db;
    char *zErrMsg = 0;
@@ -85,7 +95,7 @@ int update_ipaddress(char* username,char* ipaddr)
    }
 
    /* Create merged SQL statement */
-   snprintf(sql,sizeof(sql),"%s%s%s%s%s","UPDATE USER_IP set IP = \"",ipaddr,"\"WHERE NAME IS \"",username,"\"");      
+   snprintf(sql,sizeof(sql),"%s%s%s%s%s","UPDATE USER_messages set MESSAGE = \"",message,"\"WHERE NAME IS \"",username,"\"");      
    /* Execute SQL statement */
    rc = sqlite3_exec(db, sql, callback, (void*)data, &zErrMsg);
    if( rc != SQLITE_OK ){
@@ -98,7 +108,7 @@ int update_ipaddress(char* username,char* ipaddr)
    return 0;
 }
 
-char* retrieve_ipaddress(char* username)
+char* retrieve_message(char* username)
 {
 	 sqlite3 *db;
    char *zErrMsg = 0;
@@ -117,7 +127,7 @@ char* retrieve_ipaddress(char* username)
 
    /* Create SQL statement */
    //sql = strcat("SELECT IP_ADDRESS from USER_IP WHERE NAME IS ",username);
-   snprintf(sql,sizeof(sql),"%s%s%s","SELECT IP from USER_IP WHERE NAME IS\"",username,"\"");
+   snprintf(sql,sizeof(sql),"%s%s%s","SELECT MESSAGE from USER_messages WHERE NAME IS\"",username,"\"");
    /* Execute SQL statement */
    rc = sqlite3_exec(db, sql, callback_ip, (void*)data, &zErrMsg);
    if( rc != SQLITE_OK ){
@@ -127,6 +137,6 @@ char* retrieve_ipaddress(char* username)
       fprintf(stdout, "Operation done successfully\n");
    }
    sqlite3_close(db);
-   return ip;
+   return message;
 }
 

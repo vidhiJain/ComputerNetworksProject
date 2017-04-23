@@ -9,10 +9,12 @@
 #include "sys/socket.h"  
 #include "string.h"  
 #include <netinet/in.h>
+#include <arpa/inet.h>
 
   
-#define PORT 4444 
+#define PORT 8324
 #define BUF_SIZE 2000 
+#define USER_ID_SIZE 10
 
 void error(int n){
   switch(n){
@@ -29,11 +31,12 @@ int main(int argc, char**argv) {
   struct sockaddr_in addr, cl_addr;  
   int sockfd, ret;  
   char buffer[BUF_SIZE];  
+  char userid[USER_ID_SIZE];
   struct hostent * server;
   char * serverAddr;
 
-  if (argc < 2) {
-    printf("You need to provide the server IP address: ./client < server ip address >\n");
+  if (argc < 3) {
+    printf("You need to provide the server IP address and userid: ./client < server ip address > <userid>\n");
     exit(1);  
   }
 
@@ -54,19 +57,31 @@ int main(int argc, char**argv) {
 
   printf("Connected to the server...\n");  
 
-  memset(buffer, 0, BUF_SIZE);
-  
-  printf("Enter your message(s): ");
+//Send the client's userid
 
-  while (fgets(buffer, BUF_SIZE, stdin) != NULL) {
-    ret = sendto(sockfd, buffer, BUF_SIZE, 0, (struct sockaddr *) &addr, sizeof(addr));  
-    if (ret < 0) error(102);
-    ret = recvfrom(sockfd, buffer, BUF_SIZE, 0, NULL, NULL);  
-    if (ret < 0) error(103);
-    printf("Received: ");
-    fputs(buffer, stdout);
-    printf("\n");
+  ret = sendto(sockfd, argv[2], USER_ID_SIZE, 0, (struct sockaddr *) &addr, sizeof(addr));  
+  if (ret < 0) error(102);
+  //Send userid to server to whom to connect to?
+  memset(userid, 0, USER_ID_SIZE);
+  printf("Enter the userid: \n");
+  scanf("%s", userid);
+  ret = sendto(sockfd, userid, USER_ID_SIZE, 0, (struct sockaddr *) &addr, sizeof(addr));  
+  if (ret < 0) error(102);
+  int option = 1 ;
+  printf("Received userid %s.\nChecking if the user is online or not. \n", userid);
+  memset(buffer, 0, BUF_SIZE);
+  if(option==1){  
+    while (fgets(buffer, BUF_SIZE, stdin) != NULL) {
+      
+      ret = sendto(sockfd, buffer, BUF_SIZE, 0, (struct sockaddr *) &addr, sizeof(addr));  
+      if (ret < 0) error(102);
+      ret = recvfrom(sockfd, buffer, BUF_SIZE, 0, NULL, NULL);  
+      if (ret < 0) error(103);
+      printf("Received: ");
+      fputs(buffer, stdout);
+      printf("\n");
+      
+    }
   }
- 
   return 0;    
 }  

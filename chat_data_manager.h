@@ -5,6 +5,6 @@
 
 char* retrieve_userpass(char* username);
 
-int update_message(char* username,char* ipaddr);
+int update_socket(char* username,int sock);
 
-char* retrieve_message(char* username);
+int retrieve_socket(char* username);

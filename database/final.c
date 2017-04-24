@@ -5,8 +5,8 @@
 
 int main()
 {
-update_ipaddress("mohit","192.168.2.1");
-printf("%s\n",retrieve_ipaddress("mohit"));
+update_message("mohit","Hello how are you?");
+printf("%s\n",retrieve_message("mohit"));
 return(0);
 }
 

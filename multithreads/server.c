@@ -103,7 +103,7 @@ void *connection_handler(void *x) {
         	send(newSocket,buffer,sizeof(buffer),0);
         	dat->in_message=NULL;
         }
-        if ( ( recvBytes = recv ( newSocket, recvBuffer, 99, MSG_DONTWAIT) < 0) || );
+        if ( ( recvBytes = recv ( newSocket, recvBuffer, 99, MSG_DONTWAIT) < 0)  );
            // printf("[ERROR] No input received from client.\n");
         else
         printf("Received Packet contains \"%s\"\n\n", recvBuffer);

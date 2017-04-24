@@ -3,19 +3,20 @@
 #include <termios.h>
 #include <string.h>
 #include "ui.c"
-
-#include <sys/types.h>
-#include <sys/socket.h>
 #include <stdio.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <sys/types.h>
+#include <sys/socket.h>
 
 
-int done=0; 
+
+int finished_chat=0; 
 
 //char name[20];
+char name[20];
 int serverDownflag =0;
 int sockfd;
 WINDOW *top;
@@ -23,14 +24,12 @@ WINDOW *bottom;
 int line=1; // Line position of top
 int input=1; // Line position of top
 int maxx,maxy; // Screen dimensions
-pthread_mutex_t mutexsum = PTHREAD_MUTEX_INITIALIZER;  
+pthread_mutex_t func_mut_th = PTHREAD_MUTEX_INITIALIZER;  
 FILE * file;
 
-void *get_in_addr(struct sockaddr *sa);
+void *msg_send_func();
 
-void *sendmessage(void *name);
-
-void *listener();
+void *msg_listen_func();
 int loginflag=0;
 
 char toSend[20];
@@ -39,7 +38,7 @@ int main()
     while(1){
 
      //printf("Enter user name: ");
-    char name[20];
+    
  //scanf("%s",name);
         system("clear");
         int lcnt=0;
@@ -183,13 +182,13 @@ int main()
    //scanf("%s",toSend);
 
     // save old terminal settings
-    struct termios oldt, newt;
-    tcgetattr ( 0, &oldt );
-    newt = oldt;
+    struct termios terminal_old, terminal_new;
+    tcgetattr ( 0, &terminal_old );
+    terminal_new = terminal_old;
 
     // Disable echo and cannon
-    newt.c_lflag &= ~( ICANON | ECHO );
-    tcsetattr ( 0, TCSANOW, &newt );
+    terminal_new.c_lflag &= ~( ICANON | ECHO );
+    tcsetattr ( 0, TCSANOW, &terminal_new );
 
 
     char password[10];
@@ -199,47 +198,38 @@ int main()
     int i=0;
   
     // Reset terminal
-    tcsetattr ( 0, TCSANOW, &oldt );  
-
-    ////////////////////////////////
-    //      Build connection     //
-    ///////////////////////////////
+    tcsetattr ( 0, TCSANOW, &terminal_old );  
+    // start building connection
     int len;
-    int result;
+    int conresult;
     char buf[256];
-    struct sockaddr_in address;
+    struct sockaddr_in addr_sock;
 
     // Make socket
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
 
     // attr
-    address.sin_family = AF_INET;
-    address.sin_addr.s_addr = inet_addr("127.0.0.1");
-    address.sin_port = htons(8888);
+    addr_sock.sin_family = AF_INET;
+    addr_sock.sin_addr.s_addr = inet_addr("127.0.0.1");
+    addr_sock.sin_port = htons(8888);
 
-    len = sizeof(address);
+    len = sizeof(addr_sock);
 
     // Make connection
-    result = connect(sockfd, (struct sockaddr *)&address, len);
+    conresult = connect(sockfd, (struct sockaddr *)&addr_sock, len);
 
     printf("\n\nBuilding connection\n\n");
-
-    if(result == -1)
+    switch(conresult)
     {
-        perror("\nConnection failed, try again.\n");
+    	case -1:
+    	printf("\nFailed Connection , please try again.\n");
         exit(1);
+        break;
+        default:
+        printf("\nconnected successfully\n");
+
     }
-    else
-    {
-        printf("\n\nsuccess connecting\n");
-    }
 
-
-    ///////////////////////////////
-    //    Begin chat windows     //             
-    ///////////////////////////////
-
-    // Set up windows  
     initscr();  
     getmaxyx(stdscr,maxy,maxx);
 
@@ -263,31 +253,18 @@ int main()
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
     // Spawn the listen/receive deamons
-    pthread_create(&threads[0], &attr, sendmessage, (void *)name);
-    pthread_create(&threads[1], &attr, listener, NULL);
+    pthread_create(&threads[0], &attr, msg_send_func, NULL);
+    pthread_create(&threads[1], &attr, msg_listen_func, NULL);
 
-    // Keep alive until finish condition is done
-    while(!done);
-    tcsetattr ( 0, TCSANOW, &oldt );
+    // Keep alive until finish condition is finished_chat
+    while(!finished_chat);
+    tcsetattr ( 0, TCSANOW, &terminal_old );
     //while(1);
 }
 }
 
-
-
-void *get_in_addr(struct sockaddr *sa)
-{
-    if(sa->sa_family == AF_INET)
-    {
-        return &(((struct sockaddr_in*)sa)->sin_addr);
-    }
-
-    return &(((struct sockaddr_in6*)sa)->sin6_addr);
-}
-
-
 // Send message from keyboard to server and update screen
-void *sendmessage(void *name)
+void *msg_send_func()
 {
 
     char str[80];
@@ -325,11 +302,11 @@ void *sendmessage(void *name)
         if(strcmp(str,"quit()")==0)
         {
 
-            done = 1;
+            finished_chat = 1;
 
             // Clean up
             endwin();      
-            pthread_mutex_destroy(&mutexsum);
+            pthread_mutex_destroy(&func_mut_th);
             pthread_exit(NULL);
             close(sockfd);
         }    
@@ -351,26 +328,28 @@ void *sendmessage(void *name)
 
 
         // scroll the top if the line number exceed height
-        pthread_mutex_lock (&mutexsum);
+        pthread_mutex_lock (&func_mut_th);
 
-        if(line!=maxy/2-2)
-            line++;
-        else
+        if(line==maxy/2-2)
             scroll(top);
 
-        // scroll the bottom if the line number exceed height
-        if(input!=maxy/2-2)
-            input++;
         else
-            scroll(bottom);
+            line++;
 
-        pthread_mutex_unlock (&mutexsum);
+        // scroll the bottom if the line number exceed height
+        if(input==maxy/2-2)
+            scroll(bottom);
+        else
+        	input++;
+            
+
+        pthread_mutex_unlock (&func_mut_th);
     }
 }
 
 
 // Listen for messages and display them
-void *listener()
+void *msg_listen_func()
 {
     
     char str[80];
@@ -387,11 +366,11 @@ void *listener()
         read(sockfd,buffer,bufsize);
         if(strlen(buffer)==0){
 
-            done = 1;
+            finished_chat = 1;
             serverDownflag=1;
             // Clean up
             endwin();      
-            pthread_mutex_destroy(&mutexsum);
+            pthread_mutex_destroy(&func_mut_th);
             pthread_exit(NULL);
             close(sockfd);
 
@@ -408,11 +387,21 @@ void *listener()
         	mvwprintw(top,line,35,buffer);
        // writetochatlog(buffer,1, tok);
         // scroll the top if the line number exceed height
-        pthread_mutex_lock (&mutexsum);
-        if(line!=maxy/2-2)
-            line++;
-        else
+             pthread_mutex_lock (&func_mut_th);
+
+        if(line==maxy/2-2)
             scroll(top);
-        pthread_mutex_unlock (&mutexsum);
+
+        else
+            line++;
+
+        // scroll the bottom if the line number exceed height
+        if(input==maxy/2-2)
+            scroll(bottom);
+        else
+        	input++;
+            
+
+        pthread_mutex_unlock (&func_mut_th);
     }
 }

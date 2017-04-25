@@ -2,6 +2,7 @@
 #include <dirent.h>
 #include <stdlib.h>
 #include <string.h>
+#include "security.c"
 
  #define RESET "\e[m" 
  #define MAKE_GREEN "\e[32m" 
@@ -80,6 +81,8 @@ char *home()
 				listdir();
 				printf("\n");
 		        int notopen=1;
+		        char temp[30];
+
 		        while(notopen){
 		         				scanf("%s",temp);
 		         				//char str[999];
@@ -102,6 +105,7 @@ char *home()
 								 	desid[17]='\0';
 								 	//printf("%s\n",desid );
 								 	while( ( ch = fgetc(file) ) != EOF ){
+
 								 		if(ch=='|') 
 								 		{
 								 			ch = fgetc(file);
@@ -110,12 +114,12 @@ char *home()
 								 			else if (ch=='*') blue();
 								 			ch = fgetc(file);
 								 		}
-     									 printf("%c",ch);
+     									 printf("%c",decryptchar(ch));
 								 		}
    								 fclose(file);
    								 reset();
-   								// scanf("%s",temp);
-   								// writetochatlog(temp,"You","Kuchtohtime",0,temp1);
+   								 scanf("%s",temp);
+   								writetochatlog(temp,"You","Kuchtohtime",0,temp1);
    								 return desid;
 								 	}
 									else
@@ -172,6 +176,9 @@ int writetochatlog(char *message,char*from,char* time,int flag, char* filename)
          								return 0;
       }
    		
+   		encrypt(name);
+   		//encrypt(time);
+   		encrypt(message);
       fprintf(fp, "\n");
       fprintf(fp, "%s",name);
       fprintf(fp, "[%s]:",time);

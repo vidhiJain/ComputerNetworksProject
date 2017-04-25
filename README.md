@@ -38,4 +38,5 @@ ifconfig
 ```
 The user details (for phase 1) is a numeric userid. This will be repalced by secure file argument which will be encrypted to ensure security.
 
-![Screeshots](/images/logo.png)
+Start of Chat Application: ![Screeshots](/image2.png)
+Instance of a Chat: ![Screeshots](/image3.png)
